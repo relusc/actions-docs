@@ -2,7 +2,7 @@
 
 ![ci-workflow](https://github.com/rescDev/actions-docs/workflows/ci/badge.svg)
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/rescDev/actions-docs.svg)](https://github.com/rescDev/actions-docs)
+[![go mod version](https://img.shields.io/github/go-mod/go-version/rescDev/actions-docs.svg)](https://github.com/rescDev/actions-docs)
 
 A tool to generate documentation about your Github Action.
 
