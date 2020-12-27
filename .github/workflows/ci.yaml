@@ -1,0 +1,61 @@
+name: ci
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: git-checkout
+        uses: actions/checkout@v2
+
+      - name: go-setup
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15.x
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.33
+
+      - name: go-get
+        run: go get -v -d ./...
+
+      - name: go-test
+        run: go test -v -cover ./...
+
+      # requires either #patch, #minor or #major in Git commit message
+      - name: create-tag
+        id: create-tag
+        if: github.ref == 'refs/heads/main'
+        uses: anothrNick/github-tag-action@1.33.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          RELEASE_BRANCHES: main
+
+      - name: build-binaries
+        run: ./scripts/build.sh
+        shell: bash
+        env:
+          COMMIT: ${{ github.sha }}
+
+      - name: get-merged-pr
+        id: get-merged-pr
+        if: github.ref == 'refs/heads/main'
+        uses: 8BitJonny/gh-get-current-pr@1.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          filterOutClosed: false
+
+      - name: create-release
+        id: create-release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.create-tag.outputs.new_tag }}
+          body: ${{ fromJSON(steps.get-merged-pr.outputs.pr).body }}
+          files: build/*

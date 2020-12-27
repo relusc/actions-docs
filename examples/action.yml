@@ -1,0 +1,30 @@
+name: example-action
+description: Sample action which basically does nothing
+inputs:
+  version:
+    description: Version of the action
+    required: false
+    default: v1.2.3
+  greeting:
+    description: Which greeting do you want to use
+    required: false
+    default: Howdy
+  who-to-greet:
+    description: Who do you want to greet
+    required: true
+outputs:
+  who-did-i-greet:
+    description: Who did you greet
+    value: ${{ steps.set-greeting-output.outputs.who-did-i-greet }}
+runs:
+  using: composite
+  steps:
+    - run: echo ${{ inputs.greeting }} ${{ inputs.who-to-greet }}.
+      id: do-greeting
+      shell: bash
+    - run: echo "::set-output name=who-did-i-greet::I greeted ${{ inputs.who-to-greet }}"
+      id: set-greeting-output
+      shell: bash
+branding:
+  icon: cloud-lightning
+  color: blue
