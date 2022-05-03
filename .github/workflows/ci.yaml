@@ -9,15 +9,19 @@ jobs:
       - name: git-checkout
         uses: actions/checkout@v2
 
+      # https://github.blog/2022-04-12-git-security-vulnerability-announced/
+      - run: |
+          git config --global --add safe.directory /github/workspace
+
       - name: go-setup
         uses: actions/setup-go@v2
         with:
-          go-version: 1.15.x
+          go-version: 1.18
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.33
+          version: v1.45
 
       - name: go-get
         run: go get -v -d ./...
@@ -29,7 +33,7 @@ jobs:
       - name: create-tag
         id: create-tag
         if: github.ref == 'refs/heads/main'
-        uses: anothrNick/github-tag-action@1.33.0
+        uses: anothrNick/github-tag-action@1.36.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
@@ -44,10 +48,9 @@ jobs:
       - name: get-merged-pr
         id: get-merged-pr
         if: github.ref == 'refs/heads/main'
-        uses: 8BitJonny/gh-get-current-pr@1.0.1
+        uses: jwalton/gh-find-current-pr@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          filterOutClosed: false
+          state: all
 
       - name: create-release
         id: create-release
@@ -57,5 +60,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.create-tag.outputs.new_tag }}
-          body: ${{ fromJSON(steps.get-merged-pr.outputs.pr).body }}
+          body: ${{ steps.get-merged-pr.outputs.body }}
           files: build/*
